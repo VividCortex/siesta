@@ -50,7 +50,7 @@ func (s *Service) AddPost(f interface{}) {
 
 // Service satisfies the http.Handler interface.
 func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.ServeHTTPInContext(newNapContext(), w, r)
+	s.ServeHTTPInContext(NewSiestaContext(), w, r)
 }
 
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {

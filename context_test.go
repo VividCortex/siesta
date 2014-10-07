@@ -5,7 +5,7 @@ import (
 )
 
 func TestContext(t *testing.T) {
-	var c Context = newNapContext()
+	var c Context = NewSiestaContext()
 	c.Set("foo", "bar")
 	v := c.Get("foo")
 	if v == nil {
