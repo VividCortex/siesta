@@ -71,7 +71,6 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 
 		for re, h := range s.handlers {
 			req := r.Method + " " + r.URL.Path
-
 			if matches := re.FindStringSubmatch(req); len(matches) > 0 {
 				r.ParseForm()
 				for i, match := range matches {

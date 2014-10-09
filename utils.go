@@ -5,6 +5,7 @@ package siesta
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -31,7 +32,10 @@ func JsonResponseWriter(status_code_str, response_str string) func(c Context, w 
 		if response != nil {
 			// We'll encode it as JSON without knowing
 			// what it exactly is.
-			enc.Encode(response)
+			err := enc.Encode(response)
+			if err != nil {
+				log.Println("couldn't encode response:", err)
+			}
 		}
 
 	}
