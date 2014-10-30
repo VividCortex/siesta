@@ -3,6 +3,7 @@ package siesta
 import (
 	"errors"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -97,14 +98,14 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 	}
 }
 
-func (s *Service) Route(verb, path, usage string, f interface{}) {
+func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
 	handler := toContextHandler(f)
 
 	if n := s.routes[verb]; n == nil {
 		s.routes[verb] = &node{}
 	}
 
-	s.routes[verb].addRoute(path, handler)
+	s.routes[verb].addRoute(path.Join(s.baseURI, uriPath), handler)
 }
 
 func (s *Service) Register() {
