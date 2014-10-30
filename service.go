@@ -110,7 +110,7 @@ func (s *Service) Route(verb, pattern, usage string, f interface{}) {
 
 	expr := strings.TrimRight(strings.TrimLeft(pattern, "/"), "/")
 	expr = strings.Replace(expr, "<", "(?P<", -1)
-	expr = strings.Replace(expr, ">", `>[\w-_.]+`, -1)
+	expr = strings.Replace(expr, ">", `>[\w-_.]+)`, -1)
 
 	end := "?$"
 	if len(expr) == 0 {
