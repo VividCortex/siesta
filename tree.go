@@ -316,7 +316,7 @@ func (n *node) insertChild(numParams uint8, path string, handle contextHandler) 
 // If no handle can be found, a TSR (trailing slash redirect) recommendation is
 // made if a handle exists with an extra (without the) trailing slash for the
 // given path.
-func (n *node) getValue(path string) (handle contextHandler, p RouteParams, tsr bool) {
+func (n *node) getValue(path string) (handle contextHandler, p routeParams, tsr bool) {
 walk: // Outer loop for walking the tree
 	for {
 		if len(path) > len(n.path) {
@@ -355,7 +355,7 @@ walk: // Outer loop for walking the tree
 					// save param value
 					if p == nil {
 						// lazy allocation
-						p = make(RouteParams, 0, n.maxParams)
+						p = make(routeParams, 0, n.maxParams)
 					}
 					i := len(p)
 					p = p[:i+1] // expand slice within preallocated capacity
@@ -390,7 +390,7 @@ walk: // Outer loop for walking the tree
 					// save param value
 					if p == nil {
 						// lazy allocation
-						p = make(RouteParams, 0, n.maxParams)
+						p = make(routeParams, 0, n.maxParams)
 					}
 					i := len(p)
 					p = p[:i+1] // expand slice within preallocated capacity

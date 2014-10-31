@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package siesta
 
 // Param is a single URL parameter, consisting of a key and a value.
-type RouteParam struct {
+type routeParam struct {
 	Key   string
 	Value string
 }
@@ -35,15 +35,4 @@ type RouteParam struct {
 // Params is a Param-slice, as returned by the router.
 // The slice is ordered, the first URL parameter is also the first slice value.
 // It is therefore safe to read values by the index.
-type RouteParams []RouteParam
-
-// ByName returns the value of the first Param which key matches the given name.
-// If no matching Param is found, an empty string is returned.
-func (ps RouteParams) ByName(name string) string {
-	for i := range ps {
-		if ps[i].Key == name {
-			return ps[i].Value
-		}
-	}
-	return ""
-}
+type routeParams []routeParam
