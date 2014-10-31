@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+var ErrUnsupportedHandler = errors.New("siesta: unsupported handler")
+
 type contextHandler func(Context, http.ResponseWriter, *http.Request, func())
 
 func (h contextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +33,8 @@ func toContextHandler(f interface{}) contextHandler {
 		m = func(c Context, w http.ResponseWriter, r *http.Request, done func()) {
 			f.(func(http.ResponseWriter, *http.Request))(w, r)
 		}
+	default:
+		panic(ErrUnsupportedHandler)
 	}
 
 	return m
@@ -41,9 +45,6 @@ func Compose(stack ...interface{}) contextHandler {
 	contextStack := make([]contextHandler, 0, len(stack))
 	for i := range stack {
 		m := toContextHandler(stack[i])
-		if m == nil {
-			panic(errors.New("unsupported middleware"))
-		}
 
 		contextStack = append(contextStack, m)
 	}

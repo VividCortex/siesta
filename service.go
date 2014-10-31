@@ -1,7 +1,6 @@
 package siesta
 
 import (
-	"errors"
 	"net/http"
 	"path"
 	"regexp"
@@ -35,11 +34,6 @@ func NewService(baseURI string) *Service {
 
 func addToChain(f interface{}, chain []contextHandler) []contextHandler {
 	m := toContextHandler(f)
-
-	if m == nil {
-		panic(errors.New("unsupported middleware type"))
-	}
-
 	return append(chain, m)
 }
 
