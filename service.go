@@ -2,8 +2,8 @@ package siesta
 
 import (
 	"errors"
-	"log"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -17,6 +17,8 @@ type Service struct {
 	post []contextHandler
 
 	handlers map[*regexp.Regexp]contextHandler
+
+	routes map[string]*node
 }
 
 func NewService(baseURI string) *Service {
@@ -27,6 +29,7 @@ func NewService(baseURI string) *Service {
 	return &Service{
 		baseURI:  strings.TrimRight(baseURI, "/"),
 		handlers: make(map[*regexp.Regexp]contextHandler),
+		routes:   map[string]*node{},
 	}
 }
 
@@ -66,32 +69,22 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 	}
 
 	if !quit {
-
-		var handler contextHandler
-
-		for re, h := range s.handlers {
-			req := r.Method + " " + r.URL.Path
-			if matches := re.FindStringSubmatch(req); len(matches) > 0 {
-				r.ParseForm()
-				for i, match := range matches {
-					if i > 0 {
-						param := re.SubexpNames()[i]
-						r.Form.Set(param, match)
-					}
-				}
-
-				handler = h
-				break
-			}
-		}
+		r.URL.Path = strings.TrimRight(r.URL.Path, "/")
+		handler, params, _ := s.routes[r.Method].getValue(r.URL.Path)
 
 		if handler == nil {
 			http.NotFoundHandler().ServeHTTP(w, r)
 		} else {
+			r.ParseForm()
+			for _, p := range params {
+				r.Form.Set(p.Key, p.Value)
+			}
+
 			handler(c, w, r, func() {
 				quit = true
 			})
 		}
+
 	}
 
 	for _, m := range s.post {
@@ -105,35 +98,14 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 	}
 }
 
-func (s *Service) Route(verb, pattern, usage string, f interface{}) {
+func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
 	handler := toContextHandler(f)
 
-	expr := strings.TrimRight(strings.TrimLeft(pattern, "/"), "/")
-	expr = strings.Replace(expr, "<", "(?P<", -1)
-	expr = strings.Replace(expr, ">", `>[\w-_.]+)`, -1)
-
-	end := "?$"
-	if len(expr) == 0 {
-		end = "/?$"
+	if n := s.routes[verb]; n == nil {
+		s.routes[verb] = &node{}
 	}
 
-	if len(expr) > 0 {
-		expr += "/"
-		if s.baseURI != "/" {
-			expr = "/" + expr
-		}
-	}
-
-	expr = "^" + verb + " " + s.baseURI + expr + end
-	re := regexp.MustCompile(expr)
-
-	if _, ok := s.handlers[re]; ok {
-		panic("already registered handler for " + verb + " " + pattern)
-	} else {
-		log.Println("Handling", expr)
-	}
-
-	s.handlers[re] = handler
+	s.routes[verb].addRoute(path.Join(s.baseURI, uriPath), handler)
 }
 
 func (s *Service) Register() {
