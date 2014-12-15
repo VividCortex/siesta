@@ -19,6 +19,7 @@ func TestParamsSimple(t *testing.T) {
 	v.Set("uint", "2345")
 	v.Set("nonexistent", "8765")
 	v.Set("valueless", "")
+	v.Set("falseBool", "f")
 	company := p.String("company", "", "the company name")
 	founded := p.Int("founded", 0, "when it was founded")
 	startup := p.Bool("startup", false, "whether it's a startup")
@@ -28,6 +29,7 @@ func TestParamsSimple(t *testing.T) {
 	int64Var := p.Int64("int64", 0, "some int64")
 	uintVar := p.Uint("uint", 0, "some uint")
 	valueless := p.Bool("valueless", false, "some bool")
+	falseBool := p.Bool("falseBool", true, "a bool with value false")
 	err := p.Parse(v)
 	if err != nil {
 		t.Error(err)
@@ -49,6 +51,8 @@ func TestParamsSimple(t *testing.T) {
 		t.Errorf("expected 2345, got %d", *uintVar)
 	} else if *valueless != true {
 		t.Errorf("expected true, got %t", *valueless)
+	} else if *falseBool != false {
+		t.Errorf("expected false, got %t", *falseBool)
 	}
 
 	usage := p.Usage()
@@ -62,6 +66,7 @@ func TestParamsSimple(t *testing.T) {
 		"int64":     [3]string{"int64", "int64", "some int64"},
 		"uint":      [3]string{"uint", "uint", "some uint"},
 		"valueless": [3]string{"valueless", "bool", "some bool"},
+		"falseBool": [3]string{"falseBool", "bool", "a bool with value false"},
 		"showdocs":  [3]string{"showdocs", "bool", "Shows this usage information"},
 	}
 	compareUsageMaps(t, usage, expected)
