@@ -33,9 +33,27 @@ func (rp *Params) Parse(args url.Values) error {
 		rp.fset.Bool("showdocs", false, "Shows this usage information")
 		usage = rp.fset.Lookup("showdocs")
 	}
+
 	// Parse items from URL query string
+FLAG_LOOP:
 	for name, vals := range args {
 		for _, v := range vals {
+
+			f := rp.fset.Lookup(name)
+			if f == nil {
+				// Flag wasn't found.
+				continue FLAG_LOOP
+			}
+
+			// Check if the value is empty
+			if v == "" {
+				if bv, ok := f.Value.(boolFlag); ok && bv.IsBoolFlag() {
+					bv.Set("true")
+
+					continue FLAG_LOOP
+				}
+			}
+
 			err := rp.fset.Set(name, v)
 			if err != nil {
 				// Remove the "flag" error message and make a "params" one.
@@ -84,6 +102,11 @@ func (rp *Params) Usage() map[string][3]string {
 		docs[flag.Name] = [...]string{flag.Name, niceName, flag.Usage}
 	})
 	return docs
+}
+
+type boolFlag interface {
+	flag.Value
+	IsBoolFlag() bool
 }
 
 // Bool defines a bool param with specified name and default value.

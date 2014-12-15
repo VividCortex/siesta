@@ -18,6 +18,8 @@ func TestParamsSimple(t *testing.T) {
 	v.Set("int64", "-9876")
 	v.Set("uint", "2345")
 	v.Set("nonexistent", "8765")
+	v.Set("valueless", "")
+	v.Set("falseBool", "f")
 	company := p.String("company", "", "the company name")
 	founded := p.Int("founded", 0, "when it was founded")
 	startup := p.Bool("startup", false, "whether it's a startup")
@@ -26,6 +28,8 @@ func TestParamsSimple(t *testing.T) {
 	uint64Var := p.Uint64("uint64", 0, "some uint64")
 	int64Var := p.Int64("int64", 0, "some int64")
 	uintVar := p.Uint("uint", 0, "some uint")
+	valueless := p.Bool("valueless", false, "some bool")
+	falseBool := p.Bool("falseBool", true, "a bool with value false")
 	err := p.Parse(v)
 	if err != nil {
 		t.Error(err)
@@ -45,19 +49,25 @@ func TestParamsSimple(t *testing.T) {
 		t.Errorf("expected -9876, got %d", *int64Var)
 	} else if *uintVar != 2345 {
 		t.Errorf("expected 2345, got %d", *uintVar)
+	} else if *valueless != true {
+		t.Errorf("expected true, got %t", *valueless)
+	} else if *falseBool != false {
+		t.Errorf("expected false, got %t", *falseBool)
 	}
 
 	usage := p.Usage()
 	var expected map[string][3]string = map[string][3]string{
-		"company":  [3]string{"company", "string", "the company name"},
-		"founded":  [3]string{"founded", "int", "when it was founded"},
-		"startup":  [3]string{"startup", "bool", "whether it's a startup"},
-		"duration": [3]string{"duration", "duration", "how long it's been"},
-		"float":    [3]string{"float", "float64", "some float64"},
-		"uint64":   [3]string{"uint64", "uint64", "some uint64"},
-		"int64":    [3]string{"int64", "int64", "some int64"},
-		"uint":     [3]string{"uint", "uint", "some uint"},
-		"showdocs": [3]string{"showdocs", "bool", "Shows this usage information"},
+		"company":   [3]string{"company", "string", "the company name"},
+		"founded":   [3]string{"founded", "int", "when it was founded"},
+		"startup":   [3]string{"startup", "bool", "whether it's a startup"},
+		"duration":  [3]string{"duration", "duration", "how long it's been"},
+		"float":     [3]string{"float", "float64", "some float64"},
+		"uint64":    [3]string{"uint64", "uint64", "some uint64"},
+		"int64":     [3]string{"int64", "int64", "some int64"},
+		"uint":      [3]string{"uint", "uint", "some uint"},
+		"valueless": [3]string{"valueless", "bool", "some bool"},
+		"falseBool": [3]string{"falseBool", "bool", "a bool with value false"},
+		"showdocs":  [3]string{"showdocs", "bool", "Shows this usage information"},
 	}
 	compareUsageMaps(t, usage, expected)
 }
