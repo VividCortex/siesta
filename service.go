@@ -64,7 +64,18 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 
 	if !quit {
 		r.URL.Path = strings.TrimRight(r.URL.Path, "/")
-		handler, params, _ := s.routes[r.Method].getValue(r.URL.Path)
+
+		var (
+			handler contextHandler
+			params  routeParams
+		)
+
+		// Lookup the tree for this method
+		routeNode, ok := s.routes[r.Method]
+
+		if ok {
+			handler, params, _ = routeNode.getValue(r.URL.Path)
+		}
 
 		if handler == nil {
 			http.NotFoundHandler().ServeHTTP(w, r)
