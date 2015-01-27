@@ -53,14 +53,14 @@ func Compose(stack ...interface{}) contextHandler {
 		quitStack := false
 
 		for _, m := range contextStack {
+			m(c, w, r, func() {
+				quitStack = true
+			})
+
 			if quitStack {
 				quit()
 				break
 			}
-
-			m(c, w, r, func() {
-				quitStack = true
-			})
 		}
 	}
 }
