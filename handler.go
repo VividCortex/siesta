@@ -26,11 +26,15 @@ func toContextHandler(f interface{}) contextHandler {
 	case contextHandler:
 		m = f.(contextHandler)
 	case func(Context, http.ResponseWriter, *http.Request):
-		m = func(c Context, w http.ResponseWriter, r *http.Request, done func()) {
+		m = func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
 			f.(func(Context, http.ResponseWriter, *http.Request))(c, w, r)
 		}
+	case func(http.ResponseWriter, *http.Request, func()):
+		m = func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
+			f.(func(http.ResponseWriter, *http.Request, func()))(w, r, q)
+		}
 	case func(http.ResponseWriter, *http.Request):
-		m = func(c Context, w http.ResponseWriter, r *http.Request, done func()) {
+		m = func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
 			f.(func(http.ResponseWriter, *http.Request))(w, r)
 		}
 	default:
