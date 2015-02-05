@@ -53,13 +53,13 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
 	quit := false
 	for _, m := range s.pre {
-		if quit {
-			return
-		}
-
 		m(c, w, r, func() {
 			quit = true
 		})
+
+		if quit {
+			break
+		}
 	}
 
 	if !quit {
@@ -89,17 +89,16 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 				quit = true
 			})
 		}
-
 	}
 
 	for _, m := range s.post {
-		if quit {
-			return
-		}
-
 		m(c, w, r, func() {
 			quit = true
 		})
+
+		if quit {
+			return
+		}
 	}
 }
 
