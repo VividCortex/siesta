@@ -48,9 +48,9 @@ func printChildren(n *node, prefix string) {
 var fakeHandlerValue string
 
 func fakeHandler(val string) contextHandler {
-	return func(Context, http.ResponseWriter, *http.Request, func()) {
+	return toContextHandler(func(http.ResponseWriter, *http.Request) {
 		fakeHandlerValue = val
-	}
+	})
 }
 
 type testRequests []struct {
@@ -361,6 +361,27 @@ func TestTreeCatchAllConflictRoot(t *testing.T) {
 	testRoutes(t, routes)
 }
 
+func TestTreeDoubleWildcard(t *testing.T) {
+	const panicMsg = "only one wildcard per path segment is allowed"
+
+	routes := [...]string{
+		"/:foo:bar",
+		"/:foo:bar/",
+		"/:foo*bar",
+	}
+
+	for _, route := range routes {
+		tree := &node{}
+		recv := catchPanic(func() {
+			tree.addRoute(route, nil)
+		})
+
+		if rs, ok := recv.(string); !ok || rs != panicMsg {
+			t.Fatalf(`"Expected panic "%s" for route '%s', got "%v"`, panicMsg, route, recv)
+		}
+	}
+}
+
 /*func TestTreeDuplicateWildcard(t *testing.T) {
 	tree := &node{}
 
@@ -577,5 +598,30 @@ func TestTreeFindCaseInsensitivePath(t *testing.T) {
 				return
 			}
 		}
+	}
+}
+
+func TestTreeInvalidNodeType(t *testing.T) {
+	tree := &node{}
+	tree.addRoute("/", fakeHandler("/"))
+	tree.addRoute("/:page", fakeHandler("/:page"))
+
+	// set invalid node type
+	tree.children[0].nType = 42
+
+	// normal lookup
+	recv := catchPanic(func() {
+		tree.getValue("/test")
+	})
+	if rs, ok := recv.(string); !ok || rs != "Invalid node type" {
+		t.Fatalf(`Expected panic "Invalid node type", got "%v"`, recv)
+	}
+
+	// case-insensitive lookup
+	recv = catchPanic(func() {
+		tree.findCaseInsensitivePath("/test", true)
+	})
+	if rs, ok := recv.(string); !ok || rs != "Invalid node type" {
+		t.Fatalf(`Expected panic "Invalid node type", got "%v"`, recv)
 	}
 }
