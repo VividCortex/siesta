@@ -42,7 +42,7 @@ func NewService(baseURI string) *Service {
 	}
 
 	return &Service{
-		baseURI:  strings.TrimRight(baseURI, "/"),
+		baseURI:  path.Join("/", baseURI, "/"),
 		handlers: make(map[*regexp.Regexp]contextHandler),
 		routes:   map[string]*node{},
 	}
@@ -90,7 +90,10 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 	if !quit {
 		// The main handler is only run if we have not
 		// been signaled to quit.
-		r.URL.Path = strings.TrimRight(r.URL.Path, "/")
+
+		if r.URL.Path != "/" {
+			r.URL.Path = strings.TrimRight(r.URL.Path, "/")
+		}
 
 		var (
 			handler contextHandler
@@ -147,13 +150,11 @@ func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
 		s.routes[verb] = &node{}
 	}
 
-	s.routes[verb].addRoute(path.Join(s.baseURI, uriPath), handler)
+	s.routes[verb].addRoute(path.Join(s.baseURI, strings.TrimRight(uriPath, "/")), handler)
 }
 
 // Register registers s by adding it as a handler to the
-// DefaultServeMux in the net/http package. It registers itself
-// to both the "baseURI" and "baseURI/" patterns.
+// DefaultServeMux in the net/http package.
 func (s *Service) Register() {
 	http.Handle(s.baseURI, s)
-	http.Handle(s.baseURI+"/", s)
 }

@@ -208,7 +208,7 @@ func (n *node) addRoute(path string, handle contextHandler) {
 }
 
 func (n *node) insertChild(numParams uint8, path string, handle contextHandler) {
-	var offset int
+	var offset int // already handled bytes of the path
 
 	// find prefix until first wildcard (beginning with ':'' or '*'')
 	for i, max := 0, len(path); numParams > 0; i++ {
@@ -217,7 +217,7 @@ func (n *node) insertChild(numParams uint8, path string, handle contextHandler) 
 			continue
 		}
 
-		// Check if this Node existing children which would be
+		// check if this Node existing children which would be
 		// unreachable if we insert the wildcard here
 		if len(n.children) > 0 {
 			panic("wildcard route conflicts with existing children")
@@ -226,9 +226,16 @@ func (n *node) insertChild(numParams uint8, path string, handle contextHandler) 
 		// find wildcard end (either '/' or path end)
 		end := i + 1
 		for end < max && path[end] != '/' {
-			end++
+			switch path[end] {
+			// the wildcard name must not contain ':' and '*'
+			case ':', '*':
+				panic("only one wildcard per path segment is allowed")
+			default:
+				end++
+			}
 		}
 
+		// check if the wildcard has a name
 		if end-i < 2 {
 			panic("wildcards must be named with a non-empty name")
 		}
@@ -401,7 +408,7 @@ walk: // Outer loop for walking the tree
 					return
 
 				default:
-					panic("Unknown node type")
+					panic("Invalid node type")
 				}
 			}
 		} else if path == n.path {
@@ -467,53 +474,52 @@ func (n *node) findCaseInsensitivePath(path string, fixTrailingSlash bool) (ciPa
 				// without a trailing slash if a leaf exists for that path
 				found = (fixTrailingSlash && path == "/" && n.handle != nil)
 				return
+			}
 
-			} else {
-				n = n.children[0]
+			n = n.children[0]
+			switch n.nType {
+			case param:
+				// find param end (either '/' or path end)
+				k := 0
+				for k < len(path) && path[k] != '/' {
+					k++
+				}
 
-				switch n.nType {
-				case param:
-					// find param end (either '/' or path end)
-					k := 0
-					for k < len(path) && path[k] != '/' {
-						k++
-					}
+				// add param value to case insensitive path
+				ciPath = append(ciPath, path[:k]...)
 
-					// add param value to case insensitive path
-					ciPath = append(ciPath, path[:k]...)
-
-					// we need to go deeper!
-					if k < len(path) {
-						if len(n.children) > 0 {
-							path = path[k:]
-							n = n.children[0]
-							continue
-						} else { // ... but we can't
-							if fixTrailingSlash && len(path) == k+1 {
-								return ciPath, true
-							}
-							return
-						}
-					}
-
-					if n.handle != nil {
-						return ciPath, true
-					} else if fixTrailingSlash && len(n.children) == 1 {
-						// No handle found. Check if a handle for this path + a
-						// trailing slash exists
+				// we need to go deeper!
+				if k < len(path) {
+					if len(n.children) > 0 {
+						path = path[k:]
 						n = n.children[0]
-						if n.path == "/" && n.handle != nil {
-							return append(ciPath, '/'), true
-						}
+						continue
+					}
+
+					// ... but we can't
+					if fixTrailingSlash && len(path) == k+1 {
+						return ciPath, true
 					}
 					return
-
-				case catchAll:
-					return append(ciPath, path...), true
-
-				default:
-					panic("Unknown node type")
 				}
+
+				if n.handle != nil {
+					return ciPath, true
+				} else if fixTrailingSlash && len(n.children) == 1 {
+					// No handle found. Check if a handle for this path + a
+					// trailing slash exists
+					n = n.children[0]
+					if n.path == "/" && n.handle != nil {
+						return append(ciPath, '/'), true
+					}
+				}
+				return
+
+			case catchAll:
+				return append(ciPath, path...), true
+
+			default:
+				panic("Invalid node type")
 			}
 		} else {
 			// We should have reached the node containing the handle.
