@@ -38,6 +38,12 @@ func toContextHandler(f interface{}) contextHandler {
 			f.(func(http.ResponseWriter, *http.Request))(w, r)
 		}
 	default:
+
+		// Check for http.Handlers too.
+		if h, ok := f.(http.Handler); ok {
+			return toContextHandler(h.ServeHTTP)
+		}
+
 		panic(ErrUnsupportedHandler)
 	}
 
