@@ -32,6 +32,8 @@ type Service struct {
 	handlers map[*regexp.Regexp]contextHandler
 
 	routes map[string]*node
+
+	notFound contextHandler
 }
 
 // NewService returns a new Service with the given base URI
@@ -108,7 +110,9 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 		}
 
 		if handler == nil {
-			http.NotFoundHandler().ServeHTTP(w, r)
+			if s.notFound != nil {
+				s.notFound(c, w, r, func() {})
+			}
 		} else {
 			r.ParseForm()
 			for _, p := range params {
@@ -151,6 +155,14 @@ func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
 	}
 
 	s.routes[verb].addRoute(path.Join(s.baseURI, strings.TrimRight(uriPath, "/")), handler)
+}
+
+// SetNotFound sets the handler for all paths that do not
+// match any existing routes. It accepts the same function
+// signatures that Route does.
+func (s *Service) SetNotFound(f interface{}) {
+	handler := toContextHandler(f)
+	s.notFound = handler
 }
 
 // Register registers s by adding it as a handler to the
