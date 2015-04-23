@@ -111,7 +111,11 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 
 		if handler == nil {
 			if s.notFound != nil {
+				// Use user-defined handler.
 				s.notFound(c, w, r, func() {})
+			} else {
+				// Default to the net/http NotFoundHandler.
+				http.NotFoundHandler().ServeHTTP(w, r)
 			}
 		} else {
 			r.ParseForm()
