@@ -163,8 +163,13 @@ func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
 
 // SetNotFound sets the handler for all paths that do not
 // match any existing routes. It accepts the same function
-// signatures that Route does.
+// signatures that Route does with the addition of `nil`.
 func (s *Service) SetNotFound(f interface{}) {
+	if f == nil {
+		s.notFound = nil
+		return
+	}
+
 	handler := toContextHandler(f)
 	s.notFound = handler
 }
