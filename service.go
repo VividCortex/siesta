@@ -76,6 +76,8 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // A Service will run through both of its internal chains, quitting
 // when requested.
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
 	quit := false
 	for _, m := range s.pre {
 		m(c, w, r, func() {
@@ -118,7 +120,6 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 				http.NotFoundHandler().ServeHTTP(w, r)
 			}
 		} else {
-			r.ParseForm()
 			for _, p := range params {
 				r.Form.Set(p.Key, p.Value)
 			}
