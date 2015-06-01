@@ -67,7 +67,6 @@ func TestParamsSimple(t *testing.T) {
 		"uint":      [3]string{"uint", "uint", "some uint"},
 		"valueless": [3]string{"valueless", "bool", "some bool"},
 		"falseBool": [3]string{"falseBool", "bool", "a bool with value false"},
-		"showdocs":  [3]string{"showdocs", "bool", "Shows this usage information"},
 	}
 	compareUsageMaps(t, usage, expected)
 }
@@ -132,15 +131,10 @@ func TestParamsSlices(t *testing.T) {
 	v.Add("duration", "10ms")
 	v.Add("duration", "10s,12ms")
 	duration := p.SliceDuration("duration", 0, "how long it's been")
-	v.Add("showdocs", "true")
 
 	err := p.Parse(v)
 	if err != nil {
 		t.Error(err)
-	}
-
-	if !p.WantUsage {
-		t.Error("WantUsage should be set")
 	}
 
 	companies := []string{"VividCortex", "Inc", "comma"}
@@ -209,7 +203,6 @@ func TestParamsSlices(t *testing.T) {
 		"uint64":   [3]string{"uint64", "[]uint64", "some uint64"},
 		"int64":    [3]string{"int64", "[]int64", "some int64"},
 		"uint":     [3]string{"uint", "[]uint", "some uint"},
-		"showdocs": [3]string{"showdocs", "bool", "Shows this usage information"},
 	}
 	compareUsageMaps(t, usage, expected)
 
