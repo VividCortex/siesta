@@ -14,6 +14,7 @@ func main() {
 	service := siesta.NewService("/")
 
 	// Here's a handler that uses a URL parameter.
+	// Example: GET /greet/Bob
 	service.Route("GET", "/greet/:name", "Greets with a name.",
 		func(w http.ResponseWriter, r *http.Request) {
 			var params siesta.Params
@@ -30,6 +31,7 @@ func main() {
 	)
 
 	// Here's a handler that uses a query string parameter.
+	// Example: GET /square?number=10
 	service.Route("GET", "/square", "Prints the square of a number.",
 		func(w http.ResponseWriter, r *http.Request) {
 			var params siesta.Params
@@ -46,6 +48,7 @@ func main() {
 	)
 
 	// We can also use both URL and query string parameters.
+	// Example: GET /exponentiate/10?power=10
 	service.Route("GET", "/exponentiate/:number", "Exponentiates a number.",
 		func(w http.ResponseWriter, r *http.Request) {
 			var params siesta.Params
