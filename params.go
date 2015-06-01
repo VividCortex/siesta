@@ -17,8 +17,7 @@ import (
 // that you can't have a value with a comma if in a Sliced type.
 // Under the covers, Params uses flag.FlagSet.
 type Params struct {
-	fset      *flag.FlagSet
-	WantUsage bool
+	fset *flag.FlagSet
 }
 
 // Parse parses URL parameters from a http.Request.URL.Query(), which is a
@@ -26,12 +25,6 @@ type Params struct {
 func (rp *Params) Parse(args url.Values) error {
 	if rp.fset == nil {
 		rp.fset = flag.NewFlagSet("anonymous", flag.ExitOnError) // both args are unused.
-	}
-	usage := rp.fset.Lookup("showdocs")
-	if usage == nil {
-		// We magically add a "showdocs" param so you can do GET /resource?showdocs=true and get docs
-		rp.fset.Bool("showdocs", false, "Shows this usage information")
-		usage = rp.fset.Lookup("showdocs")
 	}
 
 	// Parse items from URL query string
@@ -66,9 +59,7 @@ FLAG_LOOP:
 			}
 		}
 	}
-	if usage.Value.String() == "true" {
-		rp.WantUsage = true
-	}
+
 	return nil
 }
 
