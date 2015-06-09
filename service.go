@@ -22,7 +22,8 @@ var services = map[string]*Service{}
 //
 // The "post" chain runs after the main handler, whether it is skipped
 // or not. The first handler in the "post" chain is guaranteed to run, but
-// execution may quit anywhere else in the chain.
+// execution may quit anywhere else in the chain if the quit function
+// is called.
 type Service struct {
 	baseURI string
 
@@ -130,6 +131,7 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 		}
 	}
 
+	quit = false
 	for _, m := range s.post {
 		m(c, w, r, func() {
 			quit = true
