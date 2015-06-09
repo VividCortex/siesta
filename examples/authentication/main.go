@@ -15,6 +15,10 @@ func main() {
 	// This is useful for logging.
 	service.AddPre(requestIdentifier)
 
+	service.AddPre(func(c siesta.Context, w http.ResponseWriter, r *http.Request) {
+		c.Set("db", DB)
+	})
+
 	// We'll add the authenticator middleware to the "pre" chain.
 	// It will ensure that every request has a valid token.
 	service.AddPre(authenticator)

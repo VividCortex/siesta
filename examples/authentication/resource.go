@@ -9,6 +9,7 @@ import (
 
 func getResource(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 	requestID := c.Get("request-id").(string)
+	db := c.Get("db").(*state)
 
 	user := c.Get("user").(string)
 	var params siesta.Params
@@ -28,15 +29,8 @@ func getResource(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resources, ok := userResources[user]
-	if !ok {
-		c.Set("status-code", http.StatusNotFound)
-		c.Set("error", "not found")
-		return
-	}
-
-	resource, ok := resources[*resourceID]
-	if !ok {
+	resource, err := db.resource(user, *resourceID)
+	if err != nil {
 		c.Set("status-code", http.StatusNotFound)
 		c.Set("error", "not found")
 		return

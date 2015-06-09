@@ -24,11 +24,12 @@ func requestIdentifier(c siesta.Context, w http.ResponseWriter, r *http.Request)
 func authenticator(c siesta.Context, w http.ResponseWriter, r *http.Request,
 	quit func()) {
 	requestID := c.Get("request-id").(string)
+	db := c.Get("db").(*state)
 
 	token, _, ok := r.BasicAuth()
 	if ok {
-		user, validToken := tokenUsers[token]
-		if !validToken {
+		user, err := db.validateToken(token)
+		if err != nil {
 			log.Printf("[Req %s] Did not provide a valid token", requestID)
 			c.Set("status-code", http.StatusUnauthorized)
 			c.Set("error", "invalid token")
