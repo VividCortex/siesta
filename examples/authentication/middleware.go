@@ -10,22 +10,30 @@ import (
 	"net/http"
 )
 
+// apiResponse defines the structure of the responses.
 type apiResponse struct {
 	Data  interface{} `json:"data,omitempty"`
 	Error string      `json:"error,omitempty"`
 }
 
+// requestIdentifier generates a request ID and sets the "request-id"
+// key in the context. It also logs the request ID and the requested URL.
 func requestIdentifier(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 	requestID := fmt.Sprintf("%x", rand.Int())
 	c.Set("request-id", requestID)
 	log.Printf("[Req %s] %s %s", requestID, r.Method, r.URL)
 }
 
+// authenticator reads the username from the HTTP basic authentication header
+// and validates the token. It sets the "user" key in the context to the
+// user associated with the token.
 func authenticator(c siesta.Context, w http.ResponseWriter, r *http.Request,
 	quit func()) {
+	// Context variables
 	requestID := c.Get("request-id").(string)
 	db := c.Get("db").(*DB)
 
+	// Check for a token in the HTTP basic authentication username field.
 	token, _, ok := r.BasicAuth()
 	if ok {
 		user, err := db.validateToken(token)
@@ -38,6 +46,8 @@ func authenticator(c siesta.Context, w http.ResponseWriter, r *http.Request,
 		}
 
 		log.Printf("[Req %s] Provided a token for: %s", requestID, user)
+
+		// Add the user to the context.
 		c.Set("user", user)
 	} else {
 		log.Printf("[Req %s] Did not provide a token", requestID)
@@ -45,11 +55,14 @@ func authenticator(c siesta.Context, w http.ResponseWriter, r *http.Request,
 		c.Set("error", "token required")
 		c.Set("status-code", http.StatusUnauthorized)
 
+		// Exit the chain here.
 		quit()
 		return
 	}
 }
 
+// responseGenerator converts response and/or error data passed through the
+// context into a structured response.
 func responseGenerator(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 	response := apiResponse{}
 
@@ -64,7 +77,9 @@ func responseGenerator(c siesta.Context, w http.ResponseWriter, r *http.Request)
 	c.Set("response", response)
 }
 
-func jsonResponseWriter(c siesta.Context, w http.ResponseWriter, r *http.Request,
+// responseWriter sets the proper headers and status code, and
+// writes a JSON-encoded response to the client.
+func responseWriter(c siesta.Context, w http.ResponseWriter, r *http.Request,
 	quit func()) {
 	// Set the request ID header.
 	if requestID := c.Get("request-id"); requestID != nil {

@@ -26,7 +26,7 @@ func main() {
 
 	// Response generation
 	service.AddPost(responseGenerator)
-	service.AddPost(jsonResponseWriter)
+	service.AddPost(responseWriter)
 
 	// Custom 404 handler
 	service.SetNotFound(func(c siesta.Context, w http.ResponseWriter, r *http.Request) {
