@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	// Create a new service rooted at /.
 	service := siesta.NewService("/")
 
 	// requestIdentifier assigns an ID to every request
@@ -16,24 +17,24 @@ func main() {
 	service.AddPre(requestIdentifier)
 
 	service.AddPre(func(c siesta.Context, w http.ResponseWriter, r *http.Request) {
-		c.Set("db", DB)
+		c.Set("db", state)
 	})
 
 	// We'll add the authenticator middleware to the "pre" chain.
 	// It will ensure that every request has a valid token.
 	service.AddPre(authenticator)
 
-	// responseGenerator and jsonResponseWriter factor out
-	// common response-writing code.
+	// Response generation
 	service.AddPost(responseGenerator)
 	service.AddPost(jsonResponseWriter)
 
-	// Custom 404 handler.
+	// Custom 404 handler
 	service.SetNotFound(func(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 		c.Set("status-code", http.StatusNotFound)
 		c.Set("error", "not found")
 	})
 
+	// Routes
 	service.Route("GET", "/resources/:resourceID", "Retrieves a resource",
 		getResource)
 

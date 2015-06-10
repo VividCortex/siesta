@@ -24,7 +24,7 @@ func requestIdentifier(c siesta.Context, w http.ResponseWriter, r *http.Request)
 func authenticator(c siesta.Context, w http.ResponseWriter, r *http.Request,
 	quit func()) {
 	requestID := c.Get("request-id").(string)
-	db := c.Get("db").(*state)
+	db := c.Get("db").(*DB)
 
 	token, _, ok := r.BasicAuth()
 	if ok {
