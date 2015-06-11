@@ -86,6 +86,9 @@ func responseWriter(c siesta.Context, w http.ResponseWriter, r *http.Request,
 		w.Header().Set("X-Request-ID", requestID.(string))
 	}
 
+	// Set the content type.
+	w.Header().Set("Content-Type", "application/json")
+
 	enc := json.NewEncoder(w)
 
 	// If we have a status code set in the context,
@@ -101,7 +104,6 @@ func responseWriter(c siesta.Context, w http.ResponseWriter, r *http.Request,
 	// Check to see if we have some sort of response.
 	response := c.Get("response")
 	if response != nil {
-		w.Header().Set("Content-Type", "application/json")
 		// We'll encode it as JSON without knowing
 		// what it exactly is.
 		enc.Encode(response)
