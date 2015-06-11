@@ -16,6 +16,7 @@ func main() {
 	// This is useful for logging.
 	service.AddPre(requestIdentifier)
 
+	// Add access to the state via the context in every handler.
 	service.AddPre(func(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 		c.Set("db", state)
 	})
