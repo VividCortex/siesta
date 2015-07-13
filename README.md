@@ -70,4 +70,4 @@ Contributions are welcome. Please open pull requests or issue reports!
 
 License
 ---
-Siesta is licensed under the MIT license. The router, which is adapted from [httprouter](https://github.com/julienschmidt/httprouter) is licensed [separately](https://github.com/VividCortex/siesta/blob/6ce42bf31875cc845310b1f4775129edfc8d9967/tree.go#L2-L24).
+Siesta is licensed under the MIT license. The router, which is adapted from [httprouter](https://github.com/julienschmidt/httprouter), is licensed [separately](https://github.com/VividCortex/siesta/blob/6ce42bf31875cc845310b1f4775129edfc8d9967/tree.go#L2-L24).
