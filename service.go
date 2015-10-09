@@ -3,7 +3,6 @@ package siesta
 import (
 	"net/http"
 	"path"
-	"regexp"
 	"strings"
 )
 
@@ -30,8 +29,6 @@ type Service struct {
 	pre  []contextHandler
 	post []contextHandler
 
-	handlers map[*regexp.Regexp]contextHandler
-
 	routes map[string]*node
 
 	notFound contextHandler
@@ -45,9 +42,8 @@ func NewService(baseURI string) *Service {
 	}
 
 	return &Service{
-		baseURI:  path.Join("/", baseURI, "/"),
-		handlers: make(map[*regexp.Regexp]contextHandler),
-		routes:   map[string]*node{},
+		baseURI: path.Join("/", baseURI, "/"),
+		routes:  map[string]*node{},
 	}
 }
 
