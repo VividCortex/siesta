@@ -68,6 +68,7 @@ type node struct {
 	indices   []byte
 	children  []*node
 	handle    contextHandler
+	usage     string
 	priority  uint32
 }
 
@@ -93,7 +94,7 @@ func (n *node) incrementChildPrio(i int) int {
 
 // addRoute adds a node with the given handle to the path.
 // Not concurrency-safe!
-func (n *node) addRoute(path string, handle contextHandler) {
+func (n *node) addRoute(path string, usage string, handle contextHandler) {
 	n.priority++
 	numParams := countParams(path)
 
@@ -121,6 +122,7 @@ func (n *node) addRoute(path string, handle contextHandler) {
 					indices:   n.indices,
 					children:  n.children,
 					handle:    n.handle,
+					usage:     n.usage,
 					priority:  n.priority - 1,
 				}
 
@@ -135,6 +137,7 @@ func (n *node) addRoute(path string, handle contextHandler) {
 				n.indices = []byte{n.path[i]}
 				n.path = path[:i]
 				n.handle = nil
+				n.usage = ""
 				n.wildChild = false
 			}
 
@@ -191,7 +194,7 @@ func (n *node) addRoute(path string, handle contextHandler) {
 					n.incrementChildPrio(len(n.indices) - 1)
 					n = child
 				}
-				n.insertChild(numParams, path, handle)
+				n.insertChild(numParams, path, usage, handle)
 				return
 
 			} else if i == len(path) { // Make node a (in-path) leaf
@@ -199,15 +202,16 @@ func (n *node) addRoute(path string, handle contextHandler) {
 					panic("a Handle is already registered for this path")
 				}
 				n.handle = handle
+				n.usage = usage
 			}
 			return
 		}
 	} else { // Empty tree
-		n.insertChild(numParams, path, handle)
+		n.insertChild(numParams, path, usage, handle)
 	}
 }
 
-func (n *node) insertChild(numParams uint8, path string, handle contextHandler) {
+func (n *node) insertChild(numParams uint8, path string, usage string, handle contextHandler) {
 	var offset int // already handled bytes of the path
 
 	// find prefix until first wildcard (beginning with ':'' or '*'')
@@ -305,6 +309,7 @@ func (n *node) insertChild(numParams uint8, path string, handle contextHandler) 
 				nType:     catchAll,
 				maxParams: 1,
 				handle:    handle,
+				usage:     usage,
 				priority:  1,
 			}
 			n.children = []*node{child}
@@ -316,6 +321,7 @@ func (n *node) insertChild(numParams uint8, path string, handle contextHandler) 
 	// insert remaining path part and handle to the leaf
 	n.path = path[offset:]
 	n.handle = handle
+	n.usage = usage
 }
 
 // Returns the handle registered with the given path (key). The values of
@@ -323,7 +329,7 @@ func (n *node) insertChild(numParams uint8, path string, handle contextHandler) 
 // If no handle can be found, a TSR (trailing slash redirect) recommendation is
 // made if a handle exists with an extra (without the) trailing slash for the
 // given path.
-func (n *node) getValue(path string) (handle contextHandler, p routeParams, tsr bool) {
+func (n *node) getValue(path string) (handle contextHandler, usage string, p routeParams, tsr bool) {
 walk: // Outer loop for walking the tree
 	for {
 		if len(path) > len(n.path) {
@@ -382,7 +388,7 @@ walk: // Outer loop for walking the tree
 						return
 					}
 
-					if handle = n.handle; handle != nil {
+					if handle, usage = n.handle, n.usage; handle != nil {
 						return
 					} else if len(n.children) == 1 {
 						// No handle found. Check if a handle for this path + a
@@ -405,6 +411,7 @@ walk: // Outer loop for walking the tree
 					p[i].Value = path
 
 					handle = n.handle
+					usage = n.usage
 					return
 
 				default:
@@ -414,7 +421,7 @@ walk: // Outer loop for walking the tree
 		} else if path == n.path {
 			// We should have reached the node containing the handle.
 			// Check if this node has a handle registered.
-			if handle = n.handle; handle != nil {
+			if handle, usage = n.handle, n.usage; handle != nil {
 				return
 			}
 

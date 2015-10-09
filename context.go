@@ -1,5 +1,12 @@
 package siesta
 
+// prepending nullByteStr avoids accidental key collisions
+const nullByteStr = "\x00"
+
+// UsageContextKey is a special context key to get the route usage information
+// within a handler.
+const UsageContextKey = nullByteStr + "usage"
+
 // A siesta Context is a context interface that gets passed to each
 // contextHandler.
 type Context interface {
