@@ -1,5 +1,7 @@
 package siesta
 
+const UsageContextKey = "\x00" + "usage"
+
 // A siesta Context is a context interface that gets passed to each
 // contextHandler.
 type Context interface {

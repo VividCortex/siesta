@@ -102,6 +102,7 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 
 		var (
 			handler contextHandler
+			usage   string
 			params  routeParams
 		)
 
@@ -109,7 +110,8 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 		routeNode, ok := s.routes[r.Method]
 
 		if ok {
-			handler, params, _ = routeNode.getValue(r.URL.Path)
+			handler, usage, params, _ = routeNode.getValue(r.URL.Path)
+			c.Set(UsageContextKey, usage)
 		}
 
 		if handler == nil {
@@ -161,7 +163,9 @@ func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
 		s.routes[verb] = &node{}
 	}
 
-	s.routes[verb].addRoute(path.Join(s.baseURI, strings.TrimRight(uriPath, "/")), handler)
+	s.routes[verb].addRoute(
+		path.Join(s.baseURI, strings.TrimRight(uriPath, "/")),
+		usage, handler)
 }
 
 // SetNotFound sets the handler for all paths that do not
