@@ -122,7 +122,7 @@ func (n *node) addRoute(path string, usage string, handle contextHandler) {
 					indices:   n.indices,
 					children:  n.children,
 					handle:    n.handle,
-					usage:     usage,
+					usage:     n.usage,
 					priority:  n.priority - 1,
 				}
 
@@ -137,6 +137,7 @@ func (n *node) addRoute(path string, usage string, handle contextHandler) {
 				n.indices = []byte{n.path[i]}
 				n.path = path[:i]
 				n.handle = nil
+				n.usage = ""
 				n.wildChild = false
 			}
 
@@ -201,6 +202,7 @@ func (n *node) addRoute(path string, usage string, handle contextHandler) {
 					panic("a Handle is already registered for this path")
 				}
 				n.handle = handle
+				n.usage = usage
 			}
 			return
 		}
