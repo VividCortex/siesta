@@ -1,15 +1,15 @@
 siesta [![Circle CI](https://circleci.com/gh/VividCortex/siesta.png?style=badge&circle-token=6b783c688fd8c3faed3554ca1e3548168ed87b10)](https://circleci.com/gh/VividCortex/siesta) [![GoDoc](https://godoc.org/github.com/VividCortex/siesta?status.svg)](https://godoc.org/github.com/VividCortex/siesta)
 ====
 
-Siesta is a composable framework for writing HTTP handlers in Go. It supports typed URL parameters, middleware chains, and context passing.
+Siesta is a framework for writing composable HTTP handlers in Go. It supports typed URL parameters, middleware chains, and context passing.
 
 Getting started
 ---
-Siesta offers a Service type, which is a collection of middleware chains and handlers rooted at a base URI. There is no distinction between a middleware function and a handler function; they are all considered to be handlers and have access to the same arguments.
+Siesta offers a `Service` type, which is a collection of middleware chains and handlers rooted at a base URI. There is no distinction between a middleware function and a handler function; they are all considered to be handlers and have access to the same arguments.
 
-Siesta accepts many types of handlers. Refer to the [GoDoc](https://godoc.org/github.com/VividCortex/siesta#Service.Route) documentation for Service.Route for more information.
+Siesta accepts many types of handlers. Refer to the [GoDoc](https://godoc.org/github.com/VividCortex/siesta#Service.Route) documentation for `Service.Route` for more information.
 
-Here is the `simple` program in the examples directory. It demonstrates the use of a Service, routing, middleware, and a Context.
+Here is the `simple` program in the examples directory. It demonstrates the use of a `Service`, routing, middleware, and a `Context`.
 
 ```go
 package main
