@@ -17,6 +17,12 @@ func getResource(c siesta.Context, w http.ResponseWriter, r *http.Request) {
 	// Check parameters
 	var params siesta.Params
 	resourceID := params.Int("resourceID", -1, "Resource identifier")
+	params.Bool("usage", false, "Show usage")
+
+	if r.URL.Query()["usage"] != nil {
+		c.Set("data", params.Usage())
+		return
+	}
 	err := params.Parse(r.Form)
 	if err != nil {
 		log.Printf("[Req %s] %v", requestID, err)
