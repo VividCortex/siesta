@@ -24,7 +24,8 @@ var services = map[string]*Service{}
 // execution may quit anywhere else in the chain if the quit function
 // is called.
 type Service struct {
-	baseURI string
+	baseURI   string
+	trimSlash bool
 
 	pre  []contextHandler
 	post []contextHandler
@@ -42,9 +43,16 @@ func NewService(baseURI string) *Service {
 	}
 
 	return &Service{
-		baseURI: path.Join("/", baseURI, "/"),
-		routes:  map[string]*node{},
+		baseURI:   path.Join("/", baseURI, "/"),
+		routes:    map[string]*node{},
+		trimSlash: true,
 	}
+}
+
+// DisableTrimSlash disables the removal of trailing slashes
+// before route matching.
+func (s *Service) DisableTrimSlash() {
+	s.trimSlash = false
 }
 
 func addToChain(f interface{}, chain []contextHandler) []contextHandler {
@@ -92,7 +100,7 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 		// The main handler is only run if we have not
 		// been signaled to quit.
 
-		if r.URL.Path != "/" {
+		if r.URL.Path != "/" && s.trimSlash {
 			r.URL.Path = strings.TrimRight(r.URL.Path, "/")
 		}
 
