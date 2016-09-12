@@ -185,6 +185,33 @@ func (s *Service) SetNotFound(f interface{}) {
 	s.notFound = handler
 }
 
+func (s *Service) GetRoutes() map[string][]string {
+	results := map[string][]string{}
+	s.getRoutes("", "", nil, results)
+	return results
+}
+
+func (s *Service) getRoutes(verb string, path string, root *node,
+	results map[string][]string) {
+	if verb == "" {
+		for verb, verbRoot := range s.routes {
+			s.getRoutes(verb, path, verbRoot, results)
+		}
+		return
+	}
+	if root == nil {
+		return
+	}
+
+	if root.handle != nil {
+		results[path+root.path] = append(results[path+root.path], verb)
+	}
+	for _, child := range root.children {
+		s.getRoutes(verb, path+root.path, child, results)
+	}
+	return
+}
+
 // Register registers s by adding it as a handler to the
 // DefaultServeMux in the net/http package.
 func (s *Service) Register() {
