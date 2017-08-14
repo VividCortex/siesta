@@ -1,6 +1,8 @@
 package siesta
 
 import (
+	"io"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"strings"
@@ -134,6 +136,11 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 			handler(c, w, r, func() {
 				quit = true
 			})
+
+			if r.Body != nil {
+				io.Copy(ioutil.Discard, r.Body)
+				r.Body.Close()
+			}
 		}
 	}
 
