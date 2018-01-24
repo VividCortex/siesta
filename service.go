@@ -35,6 +35,8 @@ type Service struct {
 	routes map[string]*node
 
 	notFound contextHandler
+
+	postExecutionFunc func(c Context, r *http.Request, err error)
 }
 
 // NewService returns a new Service with the given base URI
@@ -49,6 +51,10 @@ func NewService(baseURI string) *Service {
 		routes:    map[string]*node{},
 		trimSlash: true,
 	}
+}
+
+func (s *Service) SetPostExecutionFunc(f func(c Context, r *http.Request, err error)) {
+	s.postExecutionFunc = f
 }
 
 // DisableTrimSlash disables the removal of trailing slashes
@@ -83,6 +89,26 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // A Service will run through both of its internal chains, quitting
 // when requested.
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
+	var err error
+
+	defer func() {
+		var e interface{}
+		// Check if there was a panic
+		if e = recover(); e != nil {
+			panicErr, ok := e.(error)
+			if ok {
+				err = panicErr
+			}
+		}
+		// Run the post execution func if we have one
+		if s.postExecutionFunc != nil {
+			s.postExecutionFunc(c, r, err)
+		}
+		if e != nil {
+			// Re-panic if we recovered
+			panic(e)
+		}
+	}()
 	r.ParseForm()
 
 	quit := false
