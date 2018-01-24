@@ -36,7 +36,8 @@ type Service struct {
 
 	notFound contextHandler
 
-	postExecutionFunc func(c Context, r *http.Request, err error)
+	// postExecutionFunc runs at the end of the request
+	postExecutionFunc func(c Context, r *http.Request, panicValue interface{})
 }
 
 // NewService returns a new Service with the given base URI
@@ -53,7 +54,9 @@ func NewService(baseURI string) *Service {
 	}
 }
 
-func (s *Service) SetPostExecutionFunc(f func(c Context, r *http.Request, err error)) {
+// SetPostExecutionFunc sets a function that is executed at the end of every request.
+// panicValue will be non-nil if a value was recovered after a panic.
+func (s *Service) SetPostExecutionFunc(f func(c Context, r *http.Request, panicValue interface{})) {
 	s.postExecutionFunc = f
 }
 
@@ -89,20 +92,13 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // A Service will run through both of its internal chains, quitting
 // when requested.
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
-	var err error
-
 	defer func() {
 		var e interface{}
 		// Check if there was a panic
-		if e = recover(); e != nil {
-			panicErr, ok := e.(error)
-			if ok {
-				err = panicErr
-			}
-		}
+		e = recover()
 		// Run the post execution func if we have one
 		if s.postExecutionFunc != nil {
-			s.postExecutionFunc(c, r, err)
+			s.postExecutionFunc(c, r, e)
 		}
 		if e != nil {
 			// Re-panic if we recovered
