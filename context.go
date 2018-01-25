@@ -24,25 +24,21 @@ func (c emptyContext) Get(key string) interface{} {
 	return nil
 }
 
-// siestaContext is a concrete implementation of the siesta.Context
+// SiestaContext is a concrete implementation of the siesta.Context
 // interface. Typically this will be created by the siesta framework
 // itself upon each request. However creating your own SiestaContext
 // might be useful for testing to isolate the behavior of a single
 // handler.
-type siestaContext struct {
-	values map[string]interface{}
+type SiestaContext map[string]interface{}
+
+func NewSiestaContext() SiestaContext {
+	return SiestaContext{}
 }
 
-func NewSiestaContext() *siestaContext {
-	return &siestaContext{
-		values: make(map[string]interface{}),
-	}
+func (c SiestaContext) Set(key string, value interface{}) {
+	c[key] = value
 }
 
-func (c *siestaContext) Set(key string, value interface{}) {
-	c.values[key] = value
-}
-
-func (c *siestaContext) Get(key string) interface{} {
-	return c.values[key]
+func (c SiestaContext) Get(key string) interface{} {
+	return c[key]
 }
