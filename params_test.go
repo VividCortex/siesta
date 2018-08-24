@@ -108,28 +108,29 @@ func TestParamsSlices(t *testing.T) {
 	v := url.Values{}
 	p := Params{}
 	v.Add("company", "VividCortex")
-	v.Add("company", "Inc,comma")
+	v.Add("company", "Inc,,comma,")
 	company := p.SliceString("company", "", "the company name")
 	v.Add("founded", "2012")
-	v.Add("founded", "2012,2102")
+	v.Add("founded", "2012,,2102,")
 	founded := p.SliceInt("founded", 0, "when it was founded")
 	v.Add("startup", "true")
-	v.Add("startup", "false,true")
+	v.Add("startup", "false,,true,")
 	startup := p.SliceBool("startup", false, "whether it's a startup")
 	v.Add("float", "12.89")
-	v.Add("float", "1.25,12.625")
+	v.Add("float", "1.25,,12.625,")
 	floatVar := p.SliceFloat64("float", 0, "some float64")
 	v.Add("uint64", "1234")
-	v.Add("uint64", "1234,5678")
+	v.Add("uint64", "1234,,5678,")
+	v.Add("uint64", "18446744073709551615") // 2^63-1
 	uint64Var := p.SliceUint64("uint64", 0, "some uint64")
 	v.Add("int64", "-9876")
-	v.Add("int64", "-9876,8765")
+	v.Add("int64", "-9876,,8765,")
 	int64Var := p.SliceInt64("int64", 0, "some int64")
 	v.Add("uint", "2345")
-	v.Add("uint", "2345,3456")
+	v.Add("uint", "2345,,3456,")
 	uintVar := p.SliceUint("uint", 0, "some uint")
 	v.Add("duration", "10ms")
-	v.Add("duration", "10s,12ms")
+	v.Add("duration", "10s,,12ms,")
 	duration := p.SliceDuration("duration", 0, "how long it's been")
 
 	err := p.Parse(v)
@@ -137,7 +138,7 @@ func TestParamsSlices(t *testing.T) {
 		t.Error(err)
 	}
 
-	companies := []string{"VividCortex", "Inc", "comma"}
+	companies := []string{"VividCortex", "Inc", "", "comma", ""}
 	for i, v := range *company {
 		if v != companies[i] {
 			t.Errorf("expected %s, got %s", companies[i], v)
@@ -165,7 +166,7 @@ func TestParamsSlices(t *testing.T) {
 		}
 	}
 
-	uint64s := []uint64{1234, 1234, 5678}
+	uint64s := []uint64{1234, 1234, 5678, 18446744073709551615}
 	for i, v := range *uint64Var {
 		if v != uint64s[i] {
 			t.Errorf("expected %d, got %d", uint64s[i], v)
