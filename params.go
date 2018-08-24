@@ -267,7 +267,7 @@ func (s *SUint) String() string {
 func (s *SUint) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
 		if len(dt) > 0 {
-			parsed, err := strconv.ParseFloat(dt, 64)
+			parsed, err := strconv.ParseUint(dt, 10, 64)
 			if err != nil {
 				return err
 			}
@@ -314,11 +314,11 @@ func (s *SUint64) String() string {
 func (s *SUint64) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
 		if len(dt) > 0 {
-			parsed, err := strconv.ParseFloat(dt, 64)
+			parsed, err := strconv.ParseUint(dt, 10, 64)
 			if err != nil {
 				return err
 			}
-			*s = append(*s, uint64(parsed))
+			*s = append(*s, parsed)
 		}
 	}
 	return nil

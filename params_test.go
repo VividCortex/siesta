@@ -121,6 +121,7 @@ func TestParamsSlices(t *testing.T) {
 	floatVar := p.SliceFloat64("float", 0, "some float64")
 	v.Add("uint64", "1234")
 	v.Add("uint64", "1234,,5678,")
+	v.Add("uint64", "18446744073709551615") // 2^63-1
 	uint64Var := p.SliceUint64("uint64", 0, "some uint64")
 	v.Add("int64", "-9876")
 	v.Add("int64", "-9876,,8765,")
@@ -165,7 +166,7 @@ func TestParamsSlices(t *testing.T) {
 		}
 	}
 
-	uint64s := []uint64{1234, 1234, 5678}
+	uint64s := []uint64{1234, 1234, 5678, 18446744073709551615}
 	for i, v := range *uint64Var {
 		if v != uint64s[i] {
 			t.Errorf("expected %d, got %d", uint64s[i], v)
