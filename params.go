@@ -125,11 +125,13 @@ func (s *SBool) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SBool) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := strconv.ParseBool(dt)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := strconv.ParseBool(dt)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, parsed)
 		}
-		*s = append(*s, parsed)
 	}
 	return nil
 }
@@ -170,11 +172,13 @@ func (s *SInt) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SInt) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := strconv.ParseInt(dt, 0, 64)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := strconv.ParseInt(dt, 0, 64)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, int(parsed))
 		}
-		*s = append(*s, int(parsed))
 	}
 	return nil
 }
@@ -215,11 +219,13 @@ func (s *SInt64) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SInt64) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := strconv.ParseInt(dt, 0, 64)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := strconv.ParseInt(dt, 0, 64)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, int64(parsed))
 		}
-		*s = append(*s, int64(parsed))
 	}
 	return nil
 }
@@ -260,11 +266,13 @@ func (s *SUint) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SUint) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := strconv.ParseFloat(dt, 64)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := strconv.ParseFloat(dt, 64)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, uint(parsed))
 		}
-		*s = append(*s, uint(parsed))
 	}
 	return nil
 }
@@ -305,11 +313,13 @@ func (s *SUint64) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SUint64) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := strconv.ParseFloat(dt, 64)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := strconv.ParseFloat(dt, 64)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, uint64(parsed))
 		}
-		*s = append(*s, uint64(parsed))
 	}
 	return nil
 }
@@ -391,11 +401,13 @@ func (s *SFloat64) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SFloat64) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := strconv.ParseFloat(dt, 64)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := strconv.ParseFloat(dt, 64)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, parsed)
 		}
-		*s = append(*s, parsed)
 	}
 	return nil
 }
@@ -436,11 +448,13 @@ func (s *SDuration) String() string {
 // It's a comma-separated list, so we split it.
 func (s *SDuration) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		parsed, err := time.ParseDuration(dt)
-		if err != nil {
-			return err
+		if len(dt) > 0 {
+			parsed, err := time.ParseDuration(dt)
+			if err != nil {
+				return err
+			}
+			*s = append(*s, parsed)
 		}
-		*s = append(*s, parsed)
 	}
 	return nil
 }
