@@ -3,9 +3,13 @@ package siesta
 import (
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"path"
 	"strings"
+
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 )
 
 // Registered services keyed by base URI.
@@ -88,10 +92,33 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.ServeHTTPInContext(NewSiestaContext(), w, r)
 }
 
-// ServiceHTTPInContext serves an HTTP request within the Context c.
+// ServeHTTPInContext serves an HTTP request within the Context c.
 // A Service will run through both of its internal chains, quitting
 // when requested.
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
+
+	// Extract tracing information
+	if opentracing.IsGlobalTracerRegistered() {
+		wireCtx, err := opentracing.GlobalTracer().Extract(
+			opentracing.HTTPHeaders,
+			opentracing.HTTPHeadersCarrier(r.Header))
+		if err != nil {
+			log.Println("Failed to extract header information for trace", err)
+		} else {
+			span := opentracing.StartSpan(
+				"web.request",
+				ext.RPCServerOption(wireCtx))
+			span.SetTag("http.url", r.URL.String())
+			span.SetTag("http.method", r.Method)
+
+			// Create a new context from the http request that holds a reference to span
+			ctx := opentracing.ContextWithSpan(r.Context(), span)
+
+			// Set the request context so we can access the span from inside any handler
+			r = r.WithContext(ctx)
+		}
+	}
+
 	defer func() {
 		var e interface{}
 		// Check if there was a panic
