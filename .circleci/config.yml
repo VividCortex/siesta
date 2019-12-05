@@ -9,6 +9,8 @@ jobs:
 
     steps:
       - checkout
+      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+      - run: dep ensure -v -vendor-only
       - run: go vet ./...
       - run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
       - run: bash <(curl -s https://raw.githubusercontent.com/VividCortex/codecov-bash/master/codecov)
