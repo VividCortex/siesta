@@ -27,7 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package siesta
 
 import (
-	"fmt"
 	"strings"
 	"unicode"
 )
@@ -390,7 +389,6 @@ walk: // Outer loop for walking the tree
 					}
 
 					if handle, usage = n.handle, n.usage; handle != nil {
-						fmt.Println(n.path, "1")
 						return
 					} else if len(n.children) == 1 {
 						// No handle found. Check if a handle for this path + a
@@ -414,7 +412,6 @@ walk: // Outer loop for walking the tree
 
 					handle = n.handle
 					usage = n.usage
-					fmt.Println(n.path, "2")
 					return
 
 				default:
@@ -425,7 +422,6 @@ walk: // Outer loop for walking the tree
 			// We should have reached the node containing the handle.
 			// Check if this node has a handle registered.
 			if handle, usage = n.handle, n.usage; handle != nil {
-				fmt.Println(n.path, "3")
 				return
 			}
 
