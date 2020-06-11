@@ -47,8 +47,8 @@ func printChildren(n *node, prefix string) {
 // Used as a workaround since we can't compare functions or their adresses
 var fakeHandlerValue string
 
-func fakeHandler(val string) contextHandler {
-	return toContextHandler(func(http.ResponseWriter, *http.Request) {
+func fakeHandler(val string) ContextHandler {
+	return ToContextHandler(func(http.ResponseWriter, *http.Request) {
 		fakeHandlerValue = val
 	})
 }
@@ -152,8 +152,6 @@ func TestTreeAddAndGet(t *testing.T) {
 		tree.addRoute(route, "", fakeHandler(route))
 	}
 
-	//printChildren(tree, "")
-
 	checkRequests(t, tree, testRequests{
 		{"/a", false, "/a", nil},
 		{"/", true, "", nil},
@@ -192,8 +190,6 @@ func TestTreeWildcard(t *testing.T) {
 	for _, route := range routes {
 		tree.addRoute(route, "", fakeHandler(route))
 	}
-
-	//printChildren(tree, "")
 
 	checkRequests(t, tree, testRequests{
 		{"/", false, "/", nil},
@@ -246,8 +242,6 @@ func testRoutes(t *testing.T, routes []testRoute) {
 			t.Errorf("unexpected panic for route '%s': %v", route.path, recv)
 		}
 	}
-
-	//printChildren(tree, "")
 }
 
 func TestTreeWildcardConflict(t *testing.T) {
@@ -313,8 +307,6 @@ func TestTreeDupliatePath(t *testing.T) {
 			t.Fatalf("no panic while inserting duplicate route '%s", route)
 		}
 	}
-
-	//printChildren(tree, "")
 
 	checkRequests(t, tree, testRequests{
 		{"/", false, "/", nil},
@@ -382,17 +374,6 @@ func TestTreeDoubleWildcard(t *testing.T) {
 	}
 }
 
-/*func TestTreeDuplicateWildcard(t *testing.T) {
-	tree := &node{}
-
-	routes := [...]string{
-		"/:id/:name/:id",
-	}
-	for _, route := range routes {
-		...
-	}
-}*/
-
 func TestTreeTrailingSlashRedirect(t *testing.T) {
 	tree := &node{}
 
@@ -427,8 +408,6 @@ func TestTreeTrailingSlashRedirect(t *testing.T) {
 			t.Fatalf("panic inserting route '%s': %v", route, recv)
 		}
 	}
-
-	//printChildren(tree, "")
 
 	tsrRoutes := [...]string{
 		"/hi/",

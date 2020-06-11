@@ -29,12 +29,12 @@ type Service struct {
 	baseURI   string
 	trimSlash bool
 
-	pre  []contextHandler
-	post []contextHandler
+	pre  []ContextHandler
+	post []ContextHandler
 
 	routes map[string]*node
 
-	notFound contextHandler
+	notFound ContextHandler
 
 	// postExecutionFunc runs at the end of the request
 	postExecutionFunc func(c Context, r *http.Request, panicValue interface{})
@@ -66,19 +66,19 @@ func (s *Service) DisableTrimSlash() {
 	s.trimSlash = false
 }
 
-func addToChain(f interface{}, chain []contextHandler) []contextHandler {
-	m := toContextHandler(f)
+func addToChain(f interface{}, chain []ContextHandler) []ContextHandler {
+	m := ToContextHandler(f)
 	return append(chain, m)
 }
 
 // AddPre adds f to the end of the "pre" chain.
-// It panics if f cannot be converted to a contextHandler (see Service.Route).
+// It panics if f cannot be converted to a ContextHandler (see Service.Route).
 func (s *Service) AddPre(f interface{}) {
 	s.pre = addToChain(f, s.pre)
 }
 
 // AddPost adds f to the end of the "post" chain.
-// It panics if f cannot be converted to a contextHandler (see Service.Route).
+// It panics if f cannot be converted to a ContextHandler (see Service.Route).
 func (s *Service) AddPost(f interface{}) {
 	s.post = addToChain(f, s.post)
 }
@@ -88,7 +88,7 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.ServeHTTPInContext(NewSiestaContext(), w, r)
 }
 
-// ServiceHTTPInContext serves an HTTP request within the Context c.
+// ServeHTTPInContext serves an HTTP request within the Context c.
 // A Service will run through both of its internal chains, quitting
 // when requested.
 func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
@@ -129,7 +129,7 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 		}
 
 		var (
-			handler contextHandler
+			handler ContextHandler
 			usage   string
 			params  routeParams
 		)
@@ -190,7 +190,7 @@ func (s *Service) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.R
 // The last argument is a function which is called to signal the
 // quitting of the current execution sequence.
 func (s *Service) Route(verb, uriPath, usage string, f interface{}) {
-	handler := toContextHandler(f)
+	handler := ToContextHandler(f)
 
 	if n := s.routes[verb]; n == nil {
 		s.routes[verb] = &node{}
@@ -210,7 +210,7 @@ func (s *Service) SetNotFound(f interface{}) {
 		return
 	}
 
-	handler := toContextHandler(f)
+	handler := ToContextHandler(f)
 	s.notFound = handler
 }
 
