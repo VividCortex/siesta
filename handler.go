@@ -25,26 +25,26 @@ func (h ContextHandler) ServeHTTPInContext(c Context, w http.ResponseWriter, r *
 //     func(Context, http.ResponseWriter, *http.Request)
 //     func(Context, http.ResponseWriter, *http.Request, func())
 func ToContextHandler(f interface{}) ContextHandler {
-	switch f.(type) {
+	switch t := f.(type) {
 	case func(Context, http.ResponseWriter, *http.Request, func()):
-		return ContextHandler(f.(func(Context, http.ResponseWriter, *http.Request, func())))
+		return ContextHandler(t)
 	case ContextHandler:
-		return f.(ContextHandler)
+		return t
 	case func(Context, http.ResponseWriter, *http.Request):
 		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
-			f.(func(Context, http.ResponseWriter, *http.Request))(c, w, r)
+			t(c, w, r)
 		}
 	case func(http.ResponseWriter, *http.Request, func()):
 		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
-			f.(func(http.ResponseWriter, *http.Request, func()))(w, r, q)
+			t(w, r, q)
 		}
 	case func(http.ResponseWriter, *http.Request):
 		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
-			f.(func(http.ResponseWriter, *http.Request))(w, r)
+			t(w, r)
 		}
 	case http.Handler:
 		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
-			f.(http.Handler).ServeHTTP(w, r)
+			t.ServeHTTP(w, r)
 		}
 	default:
 		panic(ErrUnsupportedHandler)
