@@ -7,54 +7,55 @@ import (
 
 var ErrUnsupportedHandler = errors.New("siesta: unsupported handler")
 
-type contextHandler func(Context, http.ResponseWriter, *http.Request, func())
+// ContextHandler is a siesta handler.
+type ContextHandler func(Context, http.ResponseWriter, *http.Request, func())
 
-func (h contextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h(emptyContext{}, w, r, nil)
 }
 
-func (h contextHandler) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
+func (h ContextHandler) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {
 	h(c, w, r, nil)
 }
 
-func toContextHandler(f interface{}) contextHandler {
-	var m contextHandler
-
+// ToContextHandler transforms f into a ContextHandler.
+// f must be a function with one of the following signatures:
+//     func(http.ResponseWriter, *http.Request)
+//     func(http.ResponseWriter, *http.Request, func())
+//     func(Context, http.ResponseWriter, *http.Request)
+//     func(Context, http.ResponseWriter, *http.Request, func())
+func ToContextHandler(f interface{}) ContextHandler {
 	switch f.(type) {
 	case func(Context, http.ResponseWriter, *http.Request, func()):
-		m = contextHandler(f.(func(Context, http.ResponseWriter, *http.Request, func())))
-	case contextHandler:
-		m = f.(contextHandler)
+		return ContextHandler(f.(func(Context, http.ResponseWriter, *http.Request, func())))
+	case ContextHandler:
+		return f.(ContextHandler)
 	case func(Context, http.ResponseWriter, *http.Request):
-		m = func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
+		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
 			f.(func(Context, http.ResponseWriter, *http.Request))(c, w, r)
 		}
 	case func(http.ResponseWriter, *http.Request, func()):
-		m = func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
+		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
 			f.(func(http.ResponseWriter, *http.Request, func()))(w, r, q)
 		}
 	case func(http.ResponseWriter, *http.Request):
-		m = func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
+		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
 			f.(func(http.ResponseWriter, *http.Request))(w, r)
 		}
-	default:
-
-		// Check for http.Handlers too.
-		if h, ok := f.(http.Handler); ok {
-			return toContextHandler(h.ServeHTTP)
+	case http.Handler:
+		return func(c Context, w http.ResponseWriter, r *http.Request, q func()) {
+			f.(http.Handler).ServeHTTP(w, r)
 		}
-
+	default:
 		panic(ErrUnsupportedHandler)
 	}
-
-	return m
 }
 
-// Compose composes multiple contextHandlers into a single contextHandler.
-func Compose(stack ...interface{}) contextHandler {
-	contextStack := make([]contextHandler, 0, len(stack))
+// Compose composes multiple ContextHandlers into a single ContextHandler.
+func Compose(stack ...interface{}) ContextHandler {
+	contextStack := make([]ContextHandler, 0, len(stack))
 	for i := range stack {
-		m := toContextHandler(stack[i])
+		m := ToContextHandler(stack[i])
 
 		contextStack = append(contextStack, m)
 	}
