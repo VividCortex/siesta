@@ -13,13 +13,13 @@ type Context interface {
 	Get(string) interface{}
 }
 
-// This is a blank context.
-type emptyContext struct{}
+// EmptyContext is a blank context.
+type EmptyContext struct{}
 
-func (c emptyContext) Set(key string, value interface{}) {
+func (c EmptyContext) Set(key string, value interface{}) {
 }
 
-func (c emptyContext) Get(key string) interface{} {
+func (c EmptyContext) Get(key string) interface{} {
 	return nil
 }
 

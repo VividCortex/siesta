@@ -11,7 +11,7 @@ var ErrUnsupportedHandler = errors.New("siesta: unsupported handler")
 type ContextHandler func(Context, http.ResponseWriter, *http.Request, func())
 
 func (h ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h(emptyContext{}, w, r, nil)
+	h(EmptyContext{}, w, r, nil)
 }
 
 func (h ContextHandler) ServeHTTPInContext(c Context, w http.ResponseWriter, r *http.Request) {

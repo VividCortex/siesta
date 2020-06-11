@@ -18,7 +18,7 @@ func TestContext(t *testing.T) {
 }
 
 func TestEmptyContext(t *testing.T) {
-	var c Context = emptyContext{}
+	var c Context = EmptyContext{}
 	c.Set("foo", "bar")
 	v := c.Get("foo")
 	if v != nil {
