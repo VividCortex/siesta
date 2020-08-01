@@ -23,7 +23,9 @@ jobs:
     name: Build with ${{ matrix.go }}
     defaults:
       run:
-        working-directory: /home/runner/go/src/github.com/${{ github.repository }}
+        working-directory: src/github.com/${{ github.repository }}
+    env:
+      GOPATH: ${{ github.workspace }}
 
     steps:
     - name: Set up Go
@@ -34,7 +36,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        path: /home/runner/go/src/github.com/${{ github.repository }}
+        path: src/github.com/${{ github.repository }}
 
     - name: Debug
       run: |
