@@ -21,6 +21,9 @@ jobs:
             build-with: false
     continue-on-error: ${{ matrix.build-with == false }}
     name: Build with ${{ matrix.go }}
+    defaults:
+      run:
+        working-directory: /home/runner/go/src/github.com/${{ github.repository }}
 
     steps:
     - name: Set up Go
@@ -31,7 +34,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        path: go/src/github.com/VividCortex/siesta
+        path: .
 
     - name: Debug
       run: |
