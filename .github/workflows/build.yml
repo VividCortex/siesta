@@ -38,12 +38,6 @@ jobs:
       with:
         path: src/github.com/${{ github.repository }}
 
-    - name: Debug
-      run: |
-        pwd
-        echo ${GOPATH}
-        echo ${GOROOT}
-
     - name: Vet
       run: |
         go vet ./...
