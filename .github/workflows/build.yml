@@ -34,7 +34,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        path: .
+        path: /home/runner/go/src/github.com/${{ github.repository }}
 
     - name: Debug
       run: |
