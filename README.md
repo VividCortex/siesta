@@ -1,7 +1,7 @@
 # siesta
 
-[![CircleCI](https://circleci.com/gh/VividCortex/siesta.svg?style=svg)](https://circleci.com/gh/VividCortex/siesta)
 [![GoDoc](https://godoc.org/github.com/VividCortex/siesta?status.svg)](https://godoc.org/github.com/VividCortex/siesta)
+![build](https://github.com/VividCortex/siesta/workflows/build/badge.svg)
 [![codecov](https://codecov.io/gh/VividCortex/siesta/branch/master/graph/badge.svg)](https://codecov.io/gh/VividCortex/siesta)
 
 Siesta is a framework for writing composable HTTP handlers in Go. It supports typed URL parameters, middleware chains, and context passing.
