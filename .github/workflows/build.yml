@@ -4,7 +4,19 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - .github/**
+      - .gitignore
+      - .whitesource
+      - codecov.yml
+      - README.md
   pull_request:
+    paths-ignore:
+      - .github/**
+      - .gitignore
+      - .whitesource
+      - codecov.yml
+      - README.md
 
 jobs:
   build:
@@ -13,19 +25,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - go: 1.13
-            build-with: false
-          - go: 1.14
-            build-with: false
           - go: 1.15
             build-with: true
+          - go: 1.16
+            build-with: false
     continue-on-error: ${{ matrix.build-with == false }}
     name: Build with ${{ matrix.go }}
-    defaults:
-      run:
-        working-directory: src/github.com/${{ github.repository }}
     env:
-      GOPATH: ${{ github.workspace }}
+      GO111MODULE: on
 
     steps:
     - name: Set up Go
@@ -35,16 +42,12 @@ jobs:
 
     - name: Checkout code
       uses: actions/checkout@v2
-      with:
-        path: src/github.com/${{ github.repository }}
 
     - name: Vet
-      run: |
-        go vet ./...
+      run: go vet ./...
 
     - name: Test
-      run: |
-        go test -vet=off -race -coverprofile=coverage.txt -covermode=atomic ./...
+      run: go test -vet=off -race -coverprofile=coverage.txt -covermode=atomic ./...
 
     - name: Upload code coverage report
       if: matrix.build-with == true
